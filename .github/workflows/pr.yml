@@ -56,7 +56,6 @@ jobs:
           echo "RUNNER_OS:                 $RUNNER_OS"
           echo "RUNNER_TEMP:               $RUNNER_TEMP"
           echo "RUNNER_TOOL_CACHE:         $RUNNER_TOOL_CACHE"
-          echo "MY_ENV_VAR_APP:            ${{ vars.MY_ENV_VAR_APP }}"
 
       - name: Print Secrets Availability
         # NOTE: Secret VALUES are masked by GitHub and will print as ***
@@ -64,6 +63,7 @@ jobs:
         # pull_request from FORKS will NOT have access to secrets — they will be empty
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MY_GIT_TOKEN: ${{ secrets.MY_GIT_TOKEN }}
         run: |
           echo "==============================="
           echo "   SECRETS AVAILABILITY"
@@ -78,7 +78,21 @@ jobs:
           else
             echo "❌ GITHUB_TOKEN:  NOT available (fork PR or not set)"
           fi
-          echo "MY_GIT_TOKEN: ${{ secrets.MY_GIT_TOKEN }}"
+          if [ -n "$MY_GIT_TOKEN" ]; then
+            echo "✅ MY_GIT_TOKEN:   Available (value masked)"
+          else
+            echo "❌ MY_GIT_TOKEN:   NOT available (fork PR or not set)"
+          fi
+
+
+      - name: Print Custom Environment Variables
+        env:
+          MY_ENV_VAR_APP: ${{ vars.MY_ENV_VAR_APP }}
+        run: |
+          echo "==============================="
+          echo "   CUSTOM ENVIRONMENT VARIABLES"
+          echo "==============================="
+          echo "MY_ENV_VAR_APP: $MY_ENV_VAR_APP"
 
       - name: Print Full Event Context
         run: |
