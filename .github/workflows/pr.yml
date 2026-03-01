@@ -8,7 +8,10 @@ on:
 jobs:
   print-env:
     runs-on: ubuntu-latest
-
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MY_GIT_TOKEN: ${{ secrets.MY_GIT_TOKEN }}
+      MY_ENV_VAR_APP: ${{ vars.MY_ENV_VAR_APP }}
     steps:
       - name: Print GitHub Standard Environment Variables
         run: |

@@ -15,6 +15,12 @@ jobs:
     # NEVER checkout and run untrusted code from the PR branch in this workflow
     # without careful review — it is a known supply chain attack vector.
 
+    # Job-level env: makes these available to ALL steps
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MY_GIT_TOKEN: ${{ secrets.MY_GIT_TOKEN }}
+      MY_ENV_VAR_APP: ${{ vars.MY_ENV_VAR_APP }}
+
     steps:
       - name: Print GitHub Standard Environment Variables
         run: |
@@ -66,10 +72,6 @@ jobs:
       - name: Print Secrets Availability
         # pull_request_target HAS access to secrets even from fork PRs.
         # Values are always masked as *** by GitHub in logs.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Add your custom secrets below to test availability, e.g.:
-          # MY_SECRET: ${{ secrets.MY_SECRET }}
         run: |
           echo "==============================="
           echo "   SECRETS AVAILABILITY"
@@ -80,10 +82,23 @@ jobs:
           echo ""
 
           if [ -n "$GITHUB_TOKEN" ]; then
-            echo "✅ GITHUB_TOKEN:  Available (value masked)"
+            echo "✅ GITHUB_TOKEN:   Available (value masked)"
           else
-            echo "❌ GITHUB_TOKEN:  NOT available"
+            echo "❌ GITHUB_TOKEN:   NOT available"
           fi
+
+          if [ -n "$MY_GIT_TOKEN" ]; then
+            echo "✅ MY_GIT_TOKEN:   Available (value masked)"
+          else
+            echo "❌ MY_GIT_TOKEN:   NOT available"
+          fi
+
+      - name: Print Custom Environment Variables
+        run: |
+          echo "==============================="
+          echo "   CUSTOM ENVIRONMENT VARIABLES"
+          echo "==============================="
+          echo "MY_ENV_VAR_APP: $MY_ENV_VAR_APP"
 
       - name: Print Full Event Context
         run: |
