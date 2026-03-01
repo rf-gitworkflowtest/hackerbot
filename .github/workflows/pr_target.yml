@@ -16,7 +16,8 @@ jobs:
     # without careful review — it is a known supply chain attack vector.
 
     # Job-level env: makes these available to ALL steps
-    env:
+   environment: test
+   env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       MY_GIT_TOKEN: ${{ secrets.MY_GIT_TOKEN }}
       MY_ENV_VAR_APP: ${{ vars.MY_ENV_VAR_APP }}
