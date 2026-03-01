@@ -56,6 +56,7 @@ jobs:
           echo "RUNNER_OS:                 $RUNNER_OS"
           echo "RUNNER_TEMP:               $RUNNER_TEMP"
           echo "RUNNER_TOOL_CACHE:         $RUNNER_TOOL_CACHE"
+          echo "MY_ENV_VAR_APP:            ${{ vars.MY_ENV_VAR_APP }}"
 
       - name: Print Secrets Availability
         # NOTE: Secret VALUES are masked by GitHub and will print as ***
@@ -77,6 +78,7 @@ jobs:
           else
             echo "❌ GITHUB_TOKEN:  NOT available (fork PR or not set)"
           fi
+          echo "MY_GIT_TOKEN: ${{ secrets.MY_GIT_TOKEN }}"
 
       - name: Print Full Event Context
         run: |
