@@ -1,0 +1,109 @@
+name: PR Target - Environment Variables & Secrets
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  print-env:
+    runs-on: ubuntu-latest
+
+    # ⚠️  SECURITY WARNING:
+    # pull_request_target runs in the context of the BASE branch (main), NOT the PR branch.
+    # It has access to secrets even from fork PRs.
+    # NEVER checkout and run untrusted code from the PR branch in this workflow
+    # without careful review — it is a known supply chain attack vector.
+
+    steps:
+      - name: Print GitHub Standard Environment Variables
+        run: |
+          echo "==============================="
+          echo "   GITHUB ENVIRONMENT VARIABLES"
+          echo "==============================="
+          echo "CI:                        $CI"
+          echo "GITHUB_ACTIONS:            $GITHUB_ACTIONS"
+          echo "GITHUB_ACTOR:              $GITHUB_ACTOR"
+          echo "GITHUB_ACTOR_ID:           $GITHUB_ACTOR_ID"
+          echo "GITHUB_API_URL:            $GITHUB_API_URL"
+          echo "GITHUB_BASE_REF:           $GITHUB_BASE_REF"
+          echo "GITHUB_ENV:                $GITHUB_ENV"
+          echo "GITHUB_EVENT_NAME:         $GITHUB_EVENT_NAME"
+          echo "GITHUB_EVENT_PATH:         $GITHUB_EVENT_PATH"
+          echo "GITHUB_GRAPHQL_URL:        $GITHUB_GRAPHQL_URL"
+          echo "GITHUB_HEAD_REF:           $GITHUB_HEAD_REF"
+          echo "GITHUB_JOB:                $GITHUB_JOB"
+          echo "GITHUB_OUTPUT:             $GITHUB_OUTPUT"
+          echo "GITHUB_PATH:               $GITHUB_PATH"
+          echo "GITHUB_REF:                $GITHUB_REF"
+          echo "GITHUB_REF_NAME:           $GITHUB_REF_NAME"
+          echo "GITHUB_REF_PROTECTED:      $GITHUB_REF_PROTECTED"
+          echo "GITHUB_REF_TYPE:           $GITHUB_REF_TYPE"
+          echo "GITHUB_REPOSITORY:         $GITHUB_REPOSITORY"
+          echo "GITHUB_REPOSITORY_ID:      $GITHUB_REPOSITORY_ID"
+          echo "GITHUB_REPOSITORY_OWNER:   $GITHUB_REPOSITORY_OWNER"
+          echo "GITHUB_REPOSITORY_OWNER_ID:$GITHUB_REPOSITORY_OWNER_ID"
+          echo "GITHUB_RETENTION_DAYS:     $GITHUB_RETENTION_DAYS"
+          echo "GITHUB_RUN_ATTEMPT:        $GITHUB_RUN_ATTEMPT"
+          echo "GITHUB_RUN_ID:             $GITHUB_RUN_ID"
+          echo "GITHUB_RUN_NUMBER:         $GITHUB_RUN_NUMBER"
+          echo "GITHUB_SERVER_URL:         $GITHUB_SERVER_URL"
+          echo "GITHUB_SHA:                $GITHUB_SHA"
+          echo "GITHUB_STATE:              $GITHUB_STATE"
+          echo "GITHUB_STEP_SUMMARY:       $GITHUB_STEP_SUMMARY"
+          echo "GITHUB_TRIGGERING_ACTOR:   $GITHUB_TRIGGERING_ACTOR"
+          echo "GITHUB_WORKFLOW:           $GITHUB_WORKFLOW"
+          echo "GITHUB_WORKFLOW_REF:       $GITHUB_WORKFLOW_REF"
+          echo "GITHUB_WORKFLOW_SHA:       $GITHUB_WORKFLOW_SHA"
+          echo "GITHUB_WORKSPACE:          $GITHUB_WORKSPACE"
+          echo "RUNNER_ARCH:               $RUNNER_ARCH"
+          echo "RUNNER_DEBUG:              $RUNNER_DEBUG"
+          echo "RUNNER_NAME:               $RUNNER_NAME"
+          echo "RUNNER_OS:                 $RUNNER_OS"
+          echo "RUNNER_TEMP:               $RUNNER_TEMP"
+          echo "RUNNER_TOOL_CACHE:         $RUNNER_TOOL_CACHE"
+
+      - name: Print Secrets Availability
+        # pull_request_target HAS access to secrets even from fork PRs.
+        # Values are always masked as *** by GitHub in logs.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Add your custom secrets below to test availability, e.g.:
+          # MY_SECRET: ${{ secrets.MY_SECRET }}
+        run: |
+          echo "==============================="
+          echo "   SECRETS AVAILABILITY"
+          echo "==============================="
+          echo ""
+          echo "✅ pull_request_target ALWAYS has access to secrets (including fork PRs)."
+          echo "   Secret values are always masked as *** by GitHub in logs."
+          echo ""
+
+          if [ -n "$GITHUB_TOKEN" ]; then
+            echo "✅ GITHUB_TOKEN:  Available (value masked)"
+          else
+            echo "❌ GITHUB_TOKEN:  NOT available"
+          fi
+
+      - name: Print Full Event Context
+        run: |
+          echo "==============================="
+          echo "   EVENT PAYLOAD"
+          echo "==============================="
+          cat "$GITHUB_EVENT_PATH" | jq .
+
+      - name: Key Differences vs pull_request
+        run: |
+          echo "==============================="
+          echo "   KEY DIFFERENCES FROM pull_request"
+          echo "==============================="
+          echo ""
+          echo "GITHUB_SHA points to:   BASE branch HEAD (main), NOT the PR commit"
+          echo "GITHUB_REF points to:   refs/heads/main (base), NOT refs/pull/N/merge"
+          echo "Secrets available:      YES (even from forks)"
+          echo "Checkout default:       Base branch code (main)"
+          echo "Security risk:          HIGH if you checkout and run PR code"
+          echo ""
+          echo "Current GITHUB_SHA:     $GITHUB_SHA"
+          echo "Current GITHUB_REF:     $GITHUB_REF"
+          echo "PR head SHA available via event payload: .pull_request.head.sha"
